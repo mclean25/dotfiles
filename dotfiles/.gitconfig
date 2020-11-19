@@ -1,0 +1,13 @@
+[user]
+	email = alex.mclean25@gmail.com
+	name = Alex McLean
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[core]
+	excludesfile = /Users/alexmclean/.gitignore-global
+	editor = code --wait
+[http]
+	postBuffer = 524288000
