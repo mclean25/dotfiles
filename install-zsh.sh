@@ -2,7 +2,7 @@
 
 
 # Installs Oh my ZSH with Homebrew (Mac)
-ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
 
 # Assumes default ZSH installation
