@@ -19,11 +19,11 @@ echo "Homebrew casks..."
 # Installs Casks
 brew tap homebrew/cask
 
-brew cask install 1password
-brew cask install iterm2
-brew cask install slack
-brew cask install spotify
-brew cask install visual-studio-code
+brew install --cask 1password
+brew install --cask iterm2
+brew install --cask slack
+brew install --cask spotify
+brew install --cask visual-studio-code
 
 # Remove outdated versions from the cellar.
 brew cleanup
