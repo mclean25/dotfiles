@@ -17,7 +17,7 @@ brew install git
 
 echo "Homebrew casks..."
 # Installs Casks
-brew tap caskroom/cask
+brew tap homebrew/cask
 
 brew cask install 1password
 brew cask install iterm2
