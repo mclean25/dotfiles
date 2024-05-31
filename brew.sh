@@ -24,9 +24,9 @@ brew install --cask iterm2
 brew install --cask slack
 brew install --cask spotify
 brew install --cask visual-studio-code
-brew install --cask chrome
+brew install --cask google-chrome
 brew install --cask zoom
-brew install --cask linear
+brew install --cask linear-linear
 brew install --cask notion
 brew install --cask microsoft-excel
 
