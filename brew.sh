@@ -29,6 +29,7 @@ brew install --cask zoom
 brew install --cask linear-linear
 brew install --cask notion
 brew install --cask microsoft-excel
+brew install --cask microsoft-outlook
 
 # Remove outdated versions from the cellar.
 brew cleanup
