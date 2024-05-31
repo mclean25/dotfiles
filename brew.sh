@@ -26,6 +26,9 @@ brew install --cask spotify
 brew install --cask visual-studio-code
 brew install --cask chrome
 brew install --cask zoom
+brew install --cask linear
+brew install --cask notion
+brew install --cask microsoft-excel
 
 # Remove outdated versions from the cellar.
 brew cleanup
