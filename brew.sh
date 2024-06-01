@@ -19,6 +19,8 @@ echo "Homebrew casks..."
 # Installs Casks
 brew tap homebrew/cask
 
+brew install pnpm
+
 brew install --cask 1password
 brew install --cask raycast
 brew install --cask iterm2
@@ -27,6 +29,7 @@ brew install --cask slack
 brew install --cask spotify
 brew install --cask visual-studio-code
 brew install --cask google-chrome
+brew install --cask cleanshot
 brew install --cask zoom
 brew install --cask linear-linear
 brew install --cask notion
