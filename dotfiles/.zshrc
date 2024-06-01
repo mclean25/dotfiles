@@ -105,6 +105,17 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias dc="docker-compose"
+alias gcoam="git commit --amend --no-edit"
+alias gcma='git checkout main'
+alias gpnb='git push -u origin $(git symbolic-ref --short HEAD)'
+
+rbm() {
+  local current_branch=$(git symbolic-ref --short HEAD)
+  git checkout main &&
+  git pull origin main &&
+  git checkout "$current_branch" &&
+  git rebase main
+}
 
 
 source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh

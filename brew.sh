@@ -20,7 +20,9 @@ echo "Homebrew casks..."
 brew tap homebrew/cask
 
 brew install --cask 1password
+brew install --cask raycast
 brew install --cask iterm2
+brew install --cask marta
 brew install --cask slack
 brew install --cask spotify
 brew install --cask visual-studio-code
