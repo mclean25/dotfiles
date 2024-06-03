@@ -35,6 +35,7 @@ brew install --cask linear-linear
 brew install --cask notion
 brew install --cask microsoft-excel
 brew install --cask microsoft-outlook
+brew install --cask scroll-reverser
 
 # Remove outdated versions from the cellar.
 brew cleanup
