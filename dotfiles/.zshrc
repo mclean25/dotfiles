@@ -106,7 +106,9 @@ source $ZSH/oh-my-zsh.sh
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias dc="docker-compose"
 alias gcoman="git commit --amend --no-edit"
+alias gco="git checkout"
 alias gpnb='git push -u origin $(git symbolic-ref --short HEAD)'
+alias p="pnpm"
 alias lsa="ls -a"
 
 gcma() {
@@ -115,7 +117,7 @@ gcma() {
   p i
 }
 
-rbm() {
+grm() {
   local current_branch=$(git symbolic-ref --short HEAD)
   git checkout main &&
   git pull origin main &&
