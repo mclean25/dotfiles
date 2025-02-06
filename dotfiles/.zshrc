@@ -1,3 +1,5 @@
+# Amazon Q pre block. Keep at the top of this file.
+[[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh"
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block, everything else may go below.
@@ -105,11 +107,30 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias dc="docker-compose"
+alias gd="git diff"
 alias gcoman="git commit --amend --no-edit"
 alias gco="git checkout"
 alias gpnb='git push -u origin $(git symbolic-ref --short HEAD)'
+alias gpn='gpnb'
 alias p="pnpm"
 alias lsa="ls -a"
+alias gci='GIT_EDITOR=true git commit'
+alias gcia='GIT_EDITOR=true git commit -a'
+
+grecent() {
+printf "%-30s %s\n" "BRANCH" "LAST COMMIT"
+printf "%-30s %s\n" "$(printf '=%.0s' {1..30})" "$(printf '=%.0s' {1..25})"
+
+# Get branch info and format as table
+git for-each-ref \
+    --sort=-committerdate \
+    refs/heads/ \
+    --format="%(refname:short)|%(committerdate:format:%Y-%m-%d %H:%M:%S)" \
+    | head -n 10 \
+    | while IFS='|' read -r branch date; do
+        printf "%-30s %s\n" "$branch" "$date"
+    done
+}
 
 gcma() {
   git checkout main &&
@@ -125,16 +146,30 @@ grm() {
   git rebase main
 }
 
+source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-if command -v pyenv 1>/dev/null 2>&1; then
-  eval "$(pyenv init -)"
-fi
+# export NVM_DIR="$HOME/.nvm"
+# [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+# [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+# if command -v pyenv 1>/dev/null 2>&1; then
+#   eval "$(pyenv init -)"
+# fi
 
-# Pyenv
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
+# Amazon Q post block. Keep at the bottom of this file.
+# [[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh"
+
+# bun completions
+[ -s "/Users/alex/.bun/_bun" ] && source "/Users/alex/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+# nvmrc
+source $HOME/.nvm/nvm.sh
+
+# Flutter
+ export PATH="$PATH:/Users/alex/tooling/flutter/bin"
