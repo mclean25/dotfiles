@@ -10,15 +10,6 @@ fi
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
-# Path to your oh-my-zsh installation.
-export ZSH=~/.oh-my-zsh
-
-# Set name of the theme to load --- if set to "random", it will
-# load a random theme each time oh-my-zsh is loaded, in which case,
-# to know which specific one was loaded, run: echo $RANDOM_THEME
-# See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME="powerlevel10k/powerlevel10k"
-
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
 # a theme from this variable instead of looking in ~/.oh-my-zsh/themes/
@@ -77,9 +68,8 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(zsh-syntax-highlighting zsh-autosuggestions)
-
-source $ZSH/oh-my-zsh.sh
+# ZSH plugins
+source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 # User configuration
 
@@ -105,7 +95,6 @@ source $ZSH/oh-my-zsh.sh
 #
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
 alias dc="docker-compose"
 alias gd="git diff"
 alias gcoman="git commit --amend --no-edit"
@@ -116,13 +105,18 @@ alias p="pnpm"
 alias lsa="ls -a"
 alias gci='GIT_EDITOR=true git commit'
 alias gcia='GIT_EDITOR=true git commit -a'
+alias lg="lazygit"
+
+# aliases for quicker opening of code and cursor
+alias cu="open $1 -a \"Cursor\""
+alias co="open $1 -a \"Visual Studio Code\""
 
 grecent() {
-printf "%-30s %s\n" "BRANCH" "LAST COMMIT"
-printf "%-30s %s\n" "$(printf '=%.0s' {1..30})" "$(printf '=%.0s' {1..25})"
-
-# Get branch info and format as table
-git for-each-ref \
+  printf "%-30s %s\n" "BRANCH" "LAST COMMIT"
+  printf "%-30s %s\n" "$(printf '=%.0s' {1..30})" "$(printf '=%.0s' {1..25})"
+  
+  # Get branch info and format as table
+  git for-each-ref \
     --sort=-committerdate \
     refs/heads/ \
     --format="%(refname:short)|%(committerdate:format:%Y-%m-%d %H:%M:%S)" \
@@ -148,18 +142,24 @@ grm() {
 
 source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
+# History settings
+HISTFILE=~/.zsh_history
+HISTSIZE=10000
+SAVEHIST=10000
+setopt appendhistory
+setopt share_history        # share history between sessions
+setopt extended_history     # add timestamps to history
+setopt hist_expire_dups_first
+setopt hist_ignore_dups     # ignore duplicated commands
+setopt hist_ignore_space    # ignore commands that start with space
+setopt hist_verify          # show command before executing history substitution
+
+# Enable completion system
+autoload -Uz compinit
+compinit
+
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-
-# export NVM_DIR="$HOME/.nvm"
-# [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-# [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-# if command -v pyenv 1>/dev/null 2>&1; then
-#   eval "$(pyenv init -)"
-# fi
-
-# Amazon Q post block. Keep at the bottom of this file.
-# [[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh"
 
 # bun completions
 [ -s "/Users/alex/.bun/_bun" ] && source "/Users/alex/.bun/_bun"
@@ -168,8 +168,26 @@ source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
+# golang
+export PATH="$(go env GOPATH)/bin:$PATH"
+
 # nvmrc
 source $HOME/.nvm/nvm.sh
 
-# Flutter
- export PATH="$PATH:/Users/alex/tooling/flutter/bin"
+
+# pnpm
+export PNPM_HOME="/Users/alex/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
+
+# opencode
+export PATH=/Users/alex/.opencode/bin:$PATH
+
+# pdm
+export PATH=/Users/alex/Library/Python/3.9/bin:$PATH
+
+# Starship
+eval "$(starship init zsh)"
