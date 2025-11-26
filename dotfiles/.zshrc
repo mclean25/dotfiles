@@ -1,12 +1,3 @@
-# Amazon Q pre block. Keep at the top of this file.
-[[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh"
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-# Initialization code that may require console input (password prompts, [y/n]
-# confirmations, etc.) must go above this block, everything else may go below.
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-fi
-
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
@@ -158,9 +149,6 @@ setopt hist_verify          # show command before executing history substitution
 autoload -Uz compinit
 compinit
 
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-
 # bun completions
 [ -s "/Users/alex/.bun/_bun" ] && source "/Users/alex/.bun/_bun"
 
@@ -169,7 +157,7 @@ export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
 # golang
-export PATH="$(go env GOPATH)/bin:$PATH"
+export PATH="$HOME/go/bin:$PATH"
 
 # nvmrc
 source $HOME/.nvm/nvm.sh
@@ -191,3 +179,7 @@ export PATH=/Users/alex/Library/Python/3.9/bin:$PATH
 
 # Starship
 eval "$(starship init zsh)"
+
+# Load local environment variables (secrets, API keys, etc.)
+# This file is gitignored and won't be committed
+[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
