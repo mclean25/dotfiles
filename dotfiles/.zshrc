@@ -59,8 +59,9 @@
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-# ZSH plugins
-source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+# Lazy loading with zsh-defer
+source ~/zsh-defer/zsh-defer.plugin.zsh
+zsh-defer source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 # User configuration
 
@@ -131,7 +132,7 @@ grm() {
   git rebase main
 }
 
-source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+zsh-defer source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 # History settings
 HISTFILE=~/.zsh_history
@@ -159,8 +160,8 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 # golang
 export PATH="$HOME/go/bin:$PATH"
 
-# nvmrc
-source $HOME/.nvm/nvm.sh
+# nvm (lazy loaded)
+zsh-defer source $HOME/.nvm/nvm.sh
 
 
 # pnpm
