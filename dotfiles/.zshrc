@@ -103,19 +103,15 @@ alias lg="lazygit"
 alias cu="open $1 -a \"Cursor\""
 alias co="open $1 -a \"Visual Studio Code\""
 
-grecent() {
-  printf "%-30s %s\n" "BRANCH" "LAST COMMIT"
-  printf "%-30s %s\n" "$(printf '=%.0s' {1..30})" "$(printf '=%.0s' {1..25})"
-  
-  # Get branch info and format as table
-  git for-each-ref \
-    --sort=-committerdate \
-    refs/heads/ \
-    --format="%(refname:short)|%(committerdate:format:%Y-%m-%d %H:%M:%S)" \
-    | head -n 10 \
-    | while IFS='|' read -r branch date; do
-        printf "%-30s %s\n" "$branch" "$date"
-    done
+# [g]it [w]orktree [c]lient-[a]pp which takes the branch name as an argument
+# eg: gwca eng-100-something
+gwca() {
+  branch=$1
+  path=~/dev/client-app-worktrees/$branch
+  git worktree add "$path" "$branch" &&
+  cd "$path" &&
+  pnpm install &&
+  echo "✓ Worktree ready at $path"
 }
 
 gcma() {
@@ -150,8 +146,8 @@ setopt hist_verify          # show command before executing history substitution
 autoload -Uz compinit
 compinit
 
-# bun completions
-[ -s "/Users/alex/.bun/_bun" ] && source "/Users/alex/.bun/_bun"
+# bun completions (lazy loaded)
+zsh-defer source "$HOME/.bun/_bun"
 
 # bun
 export BUN_INSTALL="$HOME/.bun"
