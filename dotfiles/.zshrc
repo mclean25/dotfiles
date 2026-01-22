@@ -156,8 +156,8 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 # golang
 export PATH="$HOME/go/bin:$PATH"
 
-# nvm (lazy loaded)
-zsh-defer source $HOME/.nvm/nvm.sh
+# fnm (Fast Node Manager)
+eval "$(fnm env --use-on-cd)"
 
 
 # pnpm
