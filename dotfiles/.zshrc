@@ -1,6 +1,9 @@
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
+# Use ~/.config for XDG-compliant apps (lazygit, etc.)
+export XDG_CONFIG_HOME="$HOME/.config"
+
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
 # a theme from this variable instead of looking in ~/.oh-my-zsh/themes/
@@ -106,12 +109,12 @@ alias co="open $1 -a \"Visual Studio Code\""
 # [g]it [w]orktree [c]lient-[a]pp which takes the branch name as an argument
 # eg: gwca eng-100-something
 gwca() {
-  branch=$1
-  path=~/dev/client-app-worktrees/$branch
-  git worktree add "$path" "$branch" &&
-  cd "$path" &&
-  pnpm install &&
-  echo "✓ Worktree ready at $path"
+  local branch=$1
+  local worktree_path=~/dev/client-app-worktrees/$branch
+  local session_name=${branch##*/}
+  git -C ~/dev/client-app worktree add --no-track -b "$branch" "$worktree_path" origin/main &&
+  tmux new-session -d -s "$session_name" -c "$worktree_path" "pnpm install; echo '✓ Worktree ready'; exec zsh" &&
+  tmux switch-client -t "$session_name"
 }
 
 gcma() {
