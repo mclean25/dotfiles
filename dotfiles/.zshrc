@@ -117,6 +117,33 @@ gwca() {
   tmux switch-client -t "$session_name"
 }
 
+# [g]it [w]orktree [c]lient-app [r]emove — run from inside the worktree's tmux session
+# Switches to main session, removes the worktree, then kills the session
+gwcr() {
+  local worktree_path=${PWD}
+  local session_name=$(tmux display-message -p '#S')
+
+  # Derive branch from the current path (strip the worktrees base dir prefix)
+  local branch=${worktree_path#$HOME/dev/client-app-worktrees/}
+
+  if [[ "$branch" == "$worktree_path" ]]; then
+    echo "gwcr: not inside a client-app worktree (expected path under ~/dev/client-app-worktrees/)" >&2
+    return 1
+  fi
+
+  # Switch to main session before we kill this one
+  tmux switch-client -t main 2>/dev/null || tmux switch-client -t "$(tmux list-sessions -F '#S' | grep -v "^${session_name}$" | head -1)"
+
+  tmux display-message -d 0 "Removing worktree: $branch..."
+
+  git -C ~/dev/client-app worktree remove --force "$worktree_path" &&
+    git -C ~/dev/client-app branch -D "$branch" 2>/dev/null || true
+
+  tmux display-message -d 3000 "Worktree removed: $branch"
+
+  tmux run-shell "tmux kill-session -t '$session_name'"
+}
+
 gcma() {
   git checkout main &&
   git pull -r &&
