@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+
+# Keep window management manual by default; only use yabai for explicit shortcuts.
+yabai -m config layout float
+yabai -m config mouse_follows_focus off
+yabai -m config focus_follows_mouse off
+yabai -m config window_shadow on
+yabai -m config window_opacity off
+yabai -m config top_padding 0
+yabai -m config bottom_padding 0
+yabai -m config left_padding 0
+yabai -m config right_padding 0
+yabai -m config window_gap 0

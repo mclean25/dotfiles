@@ -1,0 +1,2 @@
+# Center the focused window in a 2/3-width column.
+shift + alt - c : ~/.config/yabai/bin/center-window.sh

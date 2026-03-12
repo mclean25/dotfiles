@@ -14,6 +14,8 @@ echo "Installing Homebrew packages..."
 # Installs Brew
 brew install node
 brew install git
+brew install koekeishiya/formulae/yabai
+brew install koekeishiya/formulae/skhd
 
 echo "Homebrew casks..."
 # Installs Casks
