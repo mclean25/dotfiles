@@ -120,6 +120,40 @@ gwca() {
   tmux switch-client -t "$session_name"
 }
 
+# [g]it [w]orktree [c]lient-app [h]andoff — move the current branch into its own worktree
+# eg: gwch
+gwch() {
+  local repo_path=~/dev/client-app
+  local branch
+  local worktree_path
+  local session_name
+
+  if [[ "$PWD" != "$repo_path" && "$PWD" != "$repo_path/"* ]]; then
+    echo "gwch: run this from within $repo_path" >&2
+    return 1
+  fi
+
+  branch=$(git -C "$repo_path" symbolic-ref --quiet --short HEAD 2>/dev/null)
+  if [[ -z "$branch" ]]; then
+    echo "gwch: could not determine current branch" >&2
+    return 1
+  fi
+
+  if [[ "$branch" == "main" ]]; then
+    echo "gwch: refusing to hand off main" >&2
+    return 1
+  fi
+
+  worktree_path=~/dev/client-app-worktrees/$branch
+  session_name=${branch##*/}
+
+  git -C "$repo_path" checkout main || return 1
+
+  git -C "$repo_path" worktree add --no-track "$worktree_path" "$branch" &&
+  tmux new-session -d -s "$session_name" -c "$worktree_path" "pnpm install; echo '✓ Worktree ready'; exec zsh" &&
+  tmux switch-client -t "$session_name"
+}
+
 # [g]it [w]orktree [c]lient-app [r]emove — run from inside the worktree's tmux session
 # Switches to main session, removes the worktree, then kills the session
 gwcr() {
