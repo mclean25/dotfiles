@@ -101,6 +101,9 @@ alias lsa="ls -a"
 alias gci='GIT_EDITOR=true git commit'
 alias gcia='GIT_EDITOR=true git commit -a'
 alias lg="lazygit"
+alias oc="opencode"
+alias cx="codex"
+alias cc="claude"
 
 # aliases for quicker opening of code and cursor
 alias cu="open $1 -a \"Cursor\""
