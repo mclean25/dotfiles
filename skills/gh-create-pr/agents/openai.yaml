@@ -1,0 +1,4 @@
+interface:
+  display_name: "Create PR"
+  short_description: "Create a concise draft PR from the branch"
+  default_prompt: "Use $gh-create-pr to open a draft pull request from the current branch."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Git Stage Commit"
+  short_description: "Stage changes and create a clean git commit"
+  default_prompt: "Use $git-stage-commit to stage all current changes and create a concise commit."
