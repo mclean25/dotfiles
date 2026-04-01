@@ -45,12 +45,16 @@ config.keys = {
 		action = wezterm.action_callback(function(win, pane)
 			local tab = pane:tab()
 			if #tab:panes() > 1 then
-				win:perform_action(wezterm.action.CloseCurrentPane({ confirm = false }), pane)
+				win:perform_action(wezterm.action.CloseCurrentPane({ confirm = true }), pane)
 			else
-				win:perform_action(wezterm.action.CloseCurrentTab({ confirm = false }), pane)
+				win:perform_action(wezterm.action.CloseCurrentTab({ confirm = true }), pane)
 			end
 		end),
 	},
+	{ key = "h", mods = "CTRL", action = wezterm.action.ActivatePaneDirection("Left") },
+	{ key = "j", mods = "CTRL", action = wezterm.action.ActivatePaneDirection("Down") },
+	{ key = "k", mods = "CTRL", action = wezterm.action.ActivatePaneDirection("Up") },
+	{ key = "l", mods = "CTRL", action = wezterm.action.ActivatePaneDirection("Right") },
 	{
 		key = "s",
 		mods = "LEADER",
