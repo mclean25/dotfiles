@@ -100,10 +100,40 @@ alias p="pnpm"
 alias lsa="ls -a"
 alias gci='GIT_EDITOR=true git commit'
 alias gcia='GIT_EDITOR=true git commit -a'
-alias lg="lazygit"
 alias oc="opencode"
 alias cx="codex"
 alias cc="claude"
+
+# WezTerm uses the pane title for tab labels in this setup.
+# These helpers set the title while fullscreen TUI apps are running,
+# then restore it to "zsh" when control returns to the shell prompt.
+set_tab_title() {
+  printf '\033]2;%s\007' "$1"
+}
+
+precmd() {
+  set_tab_title "zsh"
+}
+
+nvim() {
+  set_tab_title "nvim"
+  command nvim "$@"
+  local exit_code=$?
+  set_tab_title "zsh"
+  return $exit_code
+}
+
+lazygit() {
+  set_tab_title "lazygit"
+  command lazygit "$@"
+  local exit_code=$?
+  set_tab_title "zsh"
+  return $exit_code
+}
+
+lg() {
+  lazygit "$@"
+}
 
 # aliases for quicker opening of code and cursor
 alias cu="open $1 -a \"Cursor\""
