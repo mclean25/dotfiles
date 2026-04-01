@@ -149,9 +149,37 @@ gwch() {
 
   git -C "$repo_path" checkout main || return 1
 
-  git -C "$repo_path" worktree add --no-track "$worktree_path" "$branch" &&
+  git -C "$repo_path" worktree add "$worktree_path" "$branch" &&
   tmux new-session -d -s "$session_name" -c "$worktree_path" "pnpm install; echo '✓ Worktree ready'; exec zsh" &&
   tmux switch-client -t "$session_name"
+}
+
+# [g]it [w]orktree [c]lient-app [s]ession — resume an existing worktree in tmux
+# eg: gwcs eng-100-something
+gwcs() {
+  local branch=$1
+  local worktree_path=~/dev/client-app-worktrees/$branch
+  local session_name=${branch##*/}
+
+  if [[ -z "$branch" ]]; then
+    echo "gwcs: branch name required" >&2
+    return 1
+  fi
+
+  if [[ ! -d "$worktree_path" ]]; then
+    echo "gwcs: no worktree found at $worktree_path" >&2
+    return 1
+  fi
+
+  if ! tmux has-session -t "$session_name" 2>/dev/null; then
+    tmux new-session -d -s "$session_name" -c "$worktree_path" "exec zsh" || return 1
+  fi
+
+  if [[ -n "$TMUX" ]]; then
+    tmux switch-client -t "$session_name"
+  else
+    tmux attach-session -t "$session_name"
+  fi
 }
 
 # [g]it [w]orktree [c]lient-app [r]emove — run from inside the worktree's tmux session
