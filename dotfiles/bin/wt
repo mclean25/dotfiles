@@ -1,0 +1,186 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+repo_path="$HOME/dev/client-app"
+worktrees_root="$HOME/dev/client-app-worktrees"
+
+fail() {
+  printf 'wt: %s\n' "$1" >&2
+  exit 1
+}
+
+usage() {
+  cat <<'EOF'
+Usage:
+  wt new <branch>
+  wt handoff
+  wt open <branch>
+  wt remove [branch|path] [--delete-branch]
+EOF
+}
+
+workspace_name() {
+  printf '%s\n' "${1##*/}"
+}
+
+worktree_path_for_branch() {
+  printf '%s/%s\n' "$worktrees_root" "$1"
+}
+
+print_metadata() {
+  local branch="$1"
+  local path="$2"
+
+  printf 'branch=%s\n' "$branch"
+  printf 'workspace=%s\n' "$(workspace_name "$branch")"
+  printf 'path=%s\n' "$path"
+}
+
+branch_exists() {
+  git -C "$repo_path" show-ref --verify --quiet "refs/heads/$1"
+}
+
+ensure_worktrees_root() {
+  mkdir -p "$worktrees_root"
+}
+
+resolve_remove_target() {
+  local input="${1:-}"
+  local expanded
+
+  if [[ -z "$input" ]]; then
+    printf '%s\n' "$PWD"
+    return
+  fi
+
+  if [[ "$input" == /* || "$input" == ./* || "$input" == ../* || "$input" == ~* ]]; then
+    expanded="${input/#\~/$HOME}"
+    printf '%s\n' "$expanded"
+    return
+  fi
+
+  worktree_path_for_branch "$input"
+}
+
+cmd_new() {
+  local branch="${1:-}"
+  local path
+
+  [[ -n "$branch" ]] || fail 'branch name required'
+
+  ensure_worktrees_root
+  path="$(worktree_path_for_branch "$branch")"
+
+  if [[ -d "$path" ]]; then
+    print_metadata "$branch" "$path"
+    return
+  fi
+
+  if branch_exists "$branch"; then
+    git -C "$repo_path" worktree add "$path" "$branch"
+  else
+    git -C "$repo_path" worktree add --no-track -b "$branch" "$path" origin/main
+  fi
+
+  print_metadata "$branch" "$path"
+}
+
+cmd_handoff() {
+  local branch path
+
+  if [[ "$PWD" != "$repo_path" && "$PWD" != "$repo_path/"* ]]; then
+    fail "run this from within $repo_path"
+  fi
+
+  branch="$(git -C "$repo_path" symbolic-ref --quiet --short HEAD 2>/dev/null || true)"
+  [[ -n "$branch" ]] || fail 'could not determine current branch'
+  [[ "$branch" != 'main' ]] || fail 'refusing to hand off main'
+
+  ensure_worktrees_root
+  path="$(worktree_path_for_branch "$branch")"
+
+  if [[ -d "$path" ]]; then
+    print_metadata "$branch" "$path"
+    return
+  fi
+
+  git -C "$repo_path" checkout main
+  git -C "$repo_path" worktree add "$path" "$branch"
+
+  print_metadata "$branch" "$path"
+}
+
+cmd_open() {
+  local branch="${1:-}"
+  local path
+
+  [[ -n "$branch" ]] || fail 'branch name required'
+
+  path="$(worktree_path_for_branch "$branch")"
+  [[ -d "$path" ]] || fail "no worktree found at $path"
+
+  print_metadata "$branch" "$path"
+}
+
+cmd_remove() {
+  local target delete_branch=0 path branch
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --delete-branch)
+        delete_branch=1
+        shift
+        ;;
+      *)
+        if [[ -n "${target:-}" ]]; then
+          fail 'remove accepts at most one branch or path'
+        fi
+        target="$1"
+        shift
+        ;;
+    esac
+  done
+
+  path="$(resolve_remove_target "${target:-}")"
+  branch="${path#$worktrees_root/}"
+  [[ "$branch" != "$path" ]] || fail "not inside a client-app worktree (expected path under $worktrees_root)"
+  [[ -d "$path" ]] || fail "no worktree found at $path"
+
+  git -C "$repo_path" worktree remove --force "$path"
+
+  if [[ $delete_branch -eq 1 ]]; then
+    git -C "$repo_path" branch -D "$branch"
+  fi
+
+  print_metadata "$branch" "$path"
+}
+
+main() {
+  local command="${1:-}"
+  shift || true
+
+  case "$command" in
+    new)
+      cmd_new "$@"
+      ;;
+    handoff)
+      cmd_handoff "$@"
+      ;;
+    open)
+      cmd_open "$@"
+      ;;
+    remove)
+      cmd_remove "$@"
+      ;;
+    -h|--help|help)
+      usage
+      ;;
+    *)
+      usage >&2
+      exit 1
+      ;;
+  esac
+}
+
+main "$@"

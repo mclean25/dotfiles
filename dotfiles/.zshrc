@@ -3,6 +3,7 @@
 
 # Use ~/.config for XDG-compliant apps (lazygit, etc.)
 export XDG_CONFIG_HOME="$HOME/.config"
+export PATH="$HOME/bin:$PATH"
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -138,106 +139,6 @@ lg() {
 # aliases for quicker opening of code and cursor
 alias cu="open $1 -a \"Cursor\""
 alias co="open $1 -a \"Visual Studio Code\""
-
-# [g]it [w]orktree [c]lient-[a]pp which takes the branch name as an argument
-# eg: gwca eng-100-something
-gwca() {
-  local branch=$1
-  local worktree_path=~/dev/client-app-worktrees/$branch
-  local session_name=${branch##*/}
-  git -C ~/dev/client-app worktree add --no-track -b "$branch" "$worktree_path" origin/main &&
-  tmux new-session -d -s "$session_name" -c "$worktree_path" "pnpm install; echo '✓ Worktree ready'; exec zsh" &&
-  tmux switch-client -t "$session_name"
-}
-
-# [g]it [w]orktree [c]lient-app [h]andoff — move the current branch into its own worktree
-# eg: gwch
-gwch() {
-  local repo_path=~/dev/client-app
-  local branch
-  local worktree_path
-  local session_name
-
-  if [[ "$PWD" != "$repo_path" && "$PWD" != "$repo_path/"* ]]; then
-    echo "gwch: run this from within $repo_path" >&2
-    return 1
-  fi
-
-  branch=$(git -C "$repo_path" symbolic-ref --quiet --short HEAD 2>/dev/null)
-  if [[ -z "$branch" ]]; then
-    echo "gwch: could not determine current branch" >&2
-    return 1
-  fi
-
-  if [[ "$branch" == "main" ]]; then
-    echo "gwch: refusing to hand off main" >&2
-    return 1
-  fi
-
-  worktree_path=~/dev/client-app-worktrees/$branch
-  session_name=${branch##*/}
-
-  git -C "$repo_path" checkout main || return 1
-
-  git -C "$repo_path" worktree add "$worktree_path" "$branch" &&
-  tmux new-session -d -s "$session_name" -c "$worktree_path" "pnpm install; echo '✓ Worktree ready'; exec zsh" &&
-  tmux switch-client -t "$session_name"
-}
-
-# [g]it [w]orktree [c]lient-app [s]ession — resume an existing worktree in tmux
-# eg: gwcs eng-100-something
-gwcs() {
-  local branch=$1
-  local worktree_path=~/dev/client-app-worktrees/$branch
-  local session_name=${branch##*/}
-
-  if [[ -z "$branch" ]]; then
-    echo "gwcs: branch name required" >&2
-    return 1
-  fi
-
-  if [[ ! -d "$worktree_path" ]]; then
-    echo "gwcs: no worktree found at $worktree_path" >&2
-    return 1
-  fi
-
-  if ! tmux has-session -t "$session_name" 2>/dev/null; then
-    tmux new-session -d -s "$session_name" -c "$worktree_path" "exec zsh" || return 1
-  fi
-
-  if [[ -n "$TMUX" ]]; then
-    tmux switch-client -t "$session_name"
-  else
-    tmux attach-session -t "$session_name"
-  fi
-}
-
-# [g]it [w]orktree [c]lient-app [r]emove — run from inside the worktree's tmux session
-# Switches to main session, removes the worktree, then kills the session
-gwcr() {
-  local worktree_path=${PWD}
-  local session_name=$(tmux display-message -p '#S')
-
-  # Derive branch from the current path (strip the worktrees base dir prefix)
-  local branch=${worktree_path#$HOME/dev/client-app-worktrees/}
-
-  if [[ "$branch" == "$worktree_path" ]]; then
-    echo "gwcr: not inside a client-app worktree (expected path under ~/dev/client-app-worktrees/)" >&2
-    return 1
-  fi
-
-  # Switch to main session before we kill this one
-  tmux switch-client -t main 2>/dev/null || tmux switch-client -t "$(tmux list-sessions -F '#S' | grep -v "^${session_name}$" | head -1)"
-
-  tmux display-message -d 0 "Removing worktree: $branch..."
-
-  git -C ~/dev/client-app worktree remove --force "$worktree_path" &&
-    git -C ~/dev/client-app branch -D "$branch" 2>/dev/null || true
-
-  tmux display-message -d 3000 "Worktree removed: $branch"
-
-  tmux run-shell "tmux kill-session -t '$session_name'"
-}
 
 gcma() {
   git checkout main &&

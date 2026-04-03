@@ -9,11 +9,19 @@ done
 
 mkdir -p "$HOME/.config/yabai/bin" "$HOME/.config/skhd"
 
+mkdir -p "$HOME/bin"
+
 for f in dotfiles/.config/yabai/yabairc dotfiles/.config/yabai/bin/center-window.sh; do
     FILE="${f#dotfiles/.config/yabai/}"
     ln -sf "$PWD/${f}" "$HOME/.config/yabai/${FILE}"
 done
 
 ln -sf "$PWD/dotfiles/.config/skhd/skhdrc" "$HOME/.config/skhd/skhdrc"
+
+for f in dotfiles/bin/*; do
+    [ -e "$f" ] || continue
+    FILE="$(basename ${f})"
+    ln -sf "$PWD/${f}" "$HOME/bin/${FILE}"
+done
 
 echo "Linked dotfiles. Please restart your shell. "
