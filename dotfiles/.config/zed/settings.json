@@ -1,0 +1,115 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette
+{
+  "agent_servers": {
+    "codex-acp": {
+      "type": "registry"
+    }
+  },
+  "ui_font_weight": 400.0,
+  "edit_predictions": {
+    "provider": "zed",
+  },
+  "code_actions_on_format": {
+    "source.organizeImports": true,
+  },
+  "use_on_type_format": false,
+  "git_panel": {
+    "tree_view": true,
+    "sort_by_path": false,
+  },
+  "toolbar": {
+    "agent_review": false,
+    "breadcrumbs": true,
+    "quick_actions": false,
+  },
+  "tab_bar": {
+    "show": true,
+  },
+  "project_panel": {
+    "dock": "left",
+    "indent_size": 15,
+  },
+  "agent": {
+    "play_sound_when_agent_done": true,
+    "default_model": {
+      "provider": "openai",
+      "model": "gpt-5.4",
+    },
+    "commit_message_model": {
+      "provider": "openai",
+      "model": "gpt-5.3-chat-latest",
+    },
+  },
+  "icon_theme": {
+    "mode": "light",
+    "light": "VSCode Icons for Zed (Light)",
+    "dark": "VSCode Icons for Zed (Light)"
+  },
+  "vim_mode": true,
+  "ui_font_size": 14.0,
+  "ui_font_family": "Lucida Grande",
+  "buffer_font_family": "Victor Mono",
+  "buffer_font_size": 12.0,
+  "relative_line_numbers": "enabled",
+  "theme": {
+    "mode": "dark",
+    "light": "Gruvbox Light Soft",
+    "dark": "New Darcula Darker"
+  },
+  "terminal": {
+    "font_family": "Victor Mono",
+    "font_size": 12,
+  },
+  "languages": {
+    "TypeScript": {
+      "language_servers": [
+        "!typescript-language-server",
+        "!eslint",
+        "vtsls",
+        "biome",
+        "...",
+      ],
+      "preferred_line_length": 88,
+      "wrap_guides": [88],
+      "format_on_save": "on",
+      "colorize_brackets": true,
+      "formatter": [
+        { "language_server": { "name": "biome" } },
+        { "code_action": "source.fixAll.biome" },
+        { "code_action": "source.organizeImports.biome" },
+      ],
+    },
+    "TSX": {
+      "language_servers": [
+        "!typescript-language-server",
+        "!eslint",
+        "vtsls",
+        "biome",
+        "...",
+      ],
+      "preferred_line_length": 88,
+      "wrap_guides": [88],
+      "format_on_save": "on",
+      "formatter": [
+        {
+          "code_action": "source.fixAll.biome",
+        },
+        {
+          "code_action": "source.organizeImports.biome",
+        },
+        {
+          "language_server": {
+            "name": "biome",
+          },
+        },
+      ],
+    },
+  },
+}

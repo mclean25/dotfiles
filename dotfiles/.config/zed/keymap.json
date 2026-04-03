@@ -1,0 +1,78 @@
+[
+  {
+    "context": "Editor",
+    "bindings": {
+      "ctrl-\\": "workspace::ToggleBottomDock",
+    }
+  },
+  {
+      "context": "Editor && showing_completions",
+      "use_key_equivalents": true,
+      "bindings": {
+        "alt-tab": "editor::ComposeCompletion"
+      }
+  },
+  {
+    "context": "Editor && edit_prediction",
+    "bindings": {
+      "ctrl-y": "editor::AcceptEditPrediction",
+      "ctrl-y": "editor::AcceptEditPrediction"
+    }
+  },
+  {
+    "context": "Editor && showing_completions",
+    "bindings": {
+      "enter": "editor::ConfirmCompletion",
+      "shift-enter": "editor::ConfirmCompletionReplace",
+      "alt-tab": "editor::ComposeCompletion"
+    }
+  },
+  {
+    "context": "Terminal",
+    "bindings": {
+      "ctrl-\\": "workspace::ToggleBottomDock"
+    }
+  },
+  {
+    "context": "(Editor && edit_prediction)",
+    "bindings": {
+      "ctrl-y": "editor::AcceptEditPrediction"
+    }
+  },
+  {
+    "context": "(Editor && edit_prediction)",
+    "bindings": {
+      "ctrl-y": "editor::AcceptEditPrediction"
+    }
+  },
+  {
+    "context": "(Editor && edit_prediction)",
+    "bindings": {
+      "ctrl-y": "editor::AcceptEditPrediction"
+    }
+  },
+  {
+    "context": "(Editor && edit_prediction)",
+    "bindings": {
+      "ctrl-y": "editor::AcceptEditPrediction"
+    }
+  },
+  {
+    "context": "Editor && vim_mode == normal && !menu",
+    "bindings": {
+      "d": ["workspace::SendKeystrokes", "\"_d"],
+      "d d": ["workspace::SendKeystrokes", "\"_dd"],
+      "shift-d": ["workspace::SendKeystrokes", "\"_D"]
+    }
+  },
+  {
+    "context": "Editor && vim_mode == visual && !menu",
+    "bindings": {
+      "d": ["workspace::SendKeystrokes", "\"_d"],
+      "shift-d": ["workspace::SendKeystrokes", "\"_D"],
+      "c": ["workspace::SendKeystrokes", "\"_c"],
+      "shift-c": ["workspace::SendKeystrokes", "\"_C"],
+      "p": ["workspace::SendKeystrokes", "\"_d P"]
+    }
+  }
+]

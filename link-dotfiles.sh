@@ -8,6 +8,7 @@ for f in dotfiles/\.[^.]*; do
 done
 
 mkdir -p "$HOME/.config/yabai/bin" "$HOME/.config/skhd"
+mkdir -p "$HOME/.config/zed"
 
 mkdir -p "$HOME/bin"
 
@@ -17,6 +18,8 @@ for f in dotfiles/.config/yabai/yabairc dotfiles/.config/yabai/bin/center-window
 done
 
 ln -sf "$PWD/dotfiles/.config/skhd/skhdrc" "$HOME/.config/skhd/skhdrc"
+ln -sf "$PWD/dotfiles/.config/zed/keymap.json" "$HOME/.config/zed/keymap.json"
+ln -sf "$PWD/dotfiles/.config/zed/settings.json" "$HOME/.config/zed/settings.json"
 
 for f in dotfiles/bin/*; do
     [ -e "$f" ] || continue
