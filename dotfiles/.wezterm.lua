@@ -59,6 +59,26 @@ local function pane_cwd(pane)
 	return tostring(cwd):gsub("^file://", "")
 end
 
+local function normalize_path_input(path, pane)
+	local normalized = path:gsub("^%s+", ""):gsub("%s+$", "")
+
+	if normalized == "~" then
+		return home
+	end
+
+	if normalized:match("^~/") then
+		return home .. normalized:sub(2)
+	end
+
+	if normalized:sub(1, 1) ~= "/" then
+		local base = pane_cwd(pane) or home
+		base = base:gsub("/+$", "")
+		normalized = base .. "/" .. normalized
+	end
+
+	return normalized
+end
+
 local function format_pane_title(title)
 	if title:match("^OC%s+|%s+") then
 		return "OC"
@@ -268,22 +288,23 @@ config.keys = {
 		mods = "LEADER",
 		action = act.PromptInputLine({
 			description = "Project path",
-			action = wezterm.action_callback(function(win, pane, line)
-				if not line or line == "" then
-					return
-				end
+		action = wezterm.action_callback(function(win, pane, line)
+			if not line or line == "" then
+				return
+			end
 
-				local clean = line:gsub("/+$", "")
-				local name = clean:match("([^/]+)$") or clean
+			local resolved = normalize_path_input(line, pane)
+			local clean = resolved:gsub("/+$", "")
+			local name = clean:match("([^/]+)$") or clean
 
-				win:perform_action(
-					act.SwitchToWorkspace({
-						name = name,
-						spawn = { cwd = line },
-					}),
-					pane
-				)
-			end),
+			win:perform_action(
+				act.SwitchToWorkspace({
+					name = name,
+					spawn = { cwd = clean },
+				}),
+				pane
+			)
+		end),
 		}),
 	},
 	{ key = "m", mods = "LEADER", action = act.ToggleFullScreen },
