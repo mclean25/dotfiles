@@ -7,6 +7,12 @@
 // custom settings, run `zed: open default settings` from the
 // command palette
 {
+  "outline_panel": {
+    "dock": "right"
+  },
+  "collaboration_panel": {
+    "dock": "right"
+  },
   "agent_servers": {
     "codex-acp": {
       "type": "registry"
@@ -21,6 +27,7 @@
   },
   "use_on_type_format": false,
   "git_panel": {
+    "dock": "right",
     "tree_view": true,
     "sort_by_path": false,
   },
@@ -33,14 +40,15 @@
     "show": true,
   },
   "project_panel": {
-    "dock": "left",
+    "dock": "right",
     "indent_size": 15,
   },
   "agent": {
+    "dock": "left",
     "play_sound_when_agent_done": true,
     "default_model": {
       "provider": "openai",
-      "model": "gpt-5.4",
+      "model": "gpt-5.5",
     },
     "commit_message_model": {
       "provider": "openai",
@@ -61,7 +69,7 @@
   "theme": {
     "mode": "dark",
     "light": "Gruvbox Light Soft",
-    "dark": "New Darcula Darker"
+    "dark": "XY-Zed"
   },
   "terminal": {
     "font_family": "Victor Mono",

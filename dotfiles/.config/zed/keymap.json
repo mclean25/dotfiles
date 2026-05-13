@@ -15,7 +15,6 @@
   {
     "context": "Editor && edit_prediction",
     "bindings": {
-      "ctrl-y": "editor::AcceptEditPrediction",
       "ctrl-y": "editor::AcceptEditPrediction"
     }
   },
@@ -34,45 +33,15 @@
     }
   },
   {
-    "context": "(Editor && edit_prediction)",
+    "context": "vim_operator == d",
     "bindings": {
-      "ctrl-y": "editor::AcceptEditPrediction"
+      "d": "editor::DeleteLine"
     }
   },
   {
-    "context": "(Editor && edit_prediction)",
+    "context": "vim_mode == visual",
     "bindings": {
-      "ctrl-y": "editor::AcceptEditPrediction"
-    }
-  },
-  {
-    "context": "(Editor && edit_prediction)",
-    "bindings": {
-      "ctrl-y": "editor::AcceptEditPrediction"
-    }
-  },
-  {
-    "context": "(Editor && edit_prediction)",
-    "bindings": {
-      "ctrl-y": "editor::AcceptEditPrediction"
-    }
-  },
-  {
-    "context": "Editor && vim_mode == normal && !menu",
-    "bindings": {
-      "d": ["workspace::SendKeystrokes", "\"_d"],
-      "d d": ["workspace::SendKeystrokes", "\"_dd"],
-      "shift-d": ["workspace::SendKeystrokes", "\"_D"]
-    }
-  },
-  {
-    "context": "Editor && vim_mode == visual && !menu",
-    "bindings": {
-      "d": ["workspace::SendKeystrokes", "\"_d"],
-      "shift-d": ["workspace::SendKeystrokes", "\"_D"],
-      "c": ["workspace::SendKeystrokes", "\"_c"],
-      "shift-c": ["workspace::SendKeystrokes", "\"_C"],
-      "p": ["workspace::SendKeystrokes", "\"_d P"]
+      "p": ["vim::Paste", { "preserve_clipboard": true }]
     }
   }
 ]
