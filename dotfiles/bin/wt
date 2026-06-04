@@ -24,8 +24,12 @@ workspace_name() {
   printf '%s\n' "${1##*/}"
 }
 
+path_key_for_branch() {
+  printf '%s\n' "${1//\//-}"
+}
+
 worktree_path_for_branch() {
-  printf '%s/%s\n' "$worktrees_root" "$1"
+  printf '%s/%s\n' "$worktrees_root" "$(path_key_for_branch "$1")"
 }
 
 print_metadata() {
@@ -71,6 +75,7 @@ cmd_new() {
 
   ensure_worktrees_root
   path="$(worktree_path_for_branch "$branch")"
+  mkdir -p "$(dirname "$path")"
 
   if [[ -d "$path" ]]; then
     print_metadata "$branch" "$path"
@@ -143,9 +148,10 @@ cmd_remove() {
   done
 
   path="$(resolve_remove_target "${target:-}")"
-  branch="${path#$worktrees_root/}"
-  [[ "$branch" != "$path" ]] || fail "not inside a client-app worktree (expected path under $worktrees_root)"
+  [[ "$path" == "$worktrees_root/"* ]] || fail "not inside a client-app worktree (expected path under $worktrees_root)"
   [[ -d "$path" ]] || fail "no worktree found at $path"
+  branch="$(git -C "$path" symbolic-ref --quiet --short HEAD 2>/dev/null || true)"
+  [[ -n "$branch" ]] || fail "could not determine branch for $path"
 
   git -C "$repo_path" worktree remove --force "$path"
 
