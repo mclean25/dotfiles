@@ -34,9 +34,7 @@ Create one concise GitHub pull request for the current branch.
    Treat the issue key as a Linear ticket taxonomy value from the branch name, not as freeform text.
 
 5. Write the PR body.
-   Keep it brief.
-   Start with a `## Summary` section containing one short paragraph or a few tight bullets.
-   Add `## Why` only when the reason for the change is clear from the diff, commits, or user request.
+   Keep it brief. Just write a simple summary of the change and why if it's important.
    Omit `## Testing` unless the user explicitly asks for it.
    Do not add filler sections such as rollout plans, checklists, or boilerplate.
 
@@ -61,23 +59,6 @@ Avoid titles that are vague or mechanical:
 - `[web-77]: changes`
 - `fix stuff`
 - `address comments`
-
-## Body Template
-
-Use this structure when it fits:
-
-```md
-## Summary
-
-- Brief change summary
-- Optional second bullet for another meaningful outcome
-
-## Why
-
-- Short reason the change exists
-```
-
-If `Why` is not well-supported by the change context, omit that section entirely.
 
 ## Guardrails
 
