@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sync wt"
+  short_description: "Deploy local wt and its personal remote-test skill"
+  default_prompt: "Use $sync-wt to deploy my current local wt checkout and personal remote browser skill to whichever of dellserver and cozee-devbox are reachable."

@@ -1,0 +1,120 @@
+# Selected user settings. Refresh with scripts/export-codex-settings.py.
+"model" = "gpt-6.1-sol"
+"model_reasoning_effort" = "medium"
+"personality" = "pragmatic"
+"service_tier" = "default"
+"approvals_reviewer" = "auto_review"
+
+["features"]
+"multi_agent" = true
+"js_repl" = false
+
+["tui"]
+"animations" = false
+"theme" = "Nord"
+
+["desktop"]
+"appearanceLightCodeThemeId" = "proof"
+"appearanceDarkCodeThemeId" = "github"
+"usePointerCursors" = true
+"git-branch-prefix" = "alex/"
+"git-create-pull-request-as-draft" = false
+"git-show-sidebar-pr-icons" = true
+"git-pr-instructions" = "## Body Template\n\nUse this structure when it fits:\n\n```md\n## Summary\n\n- Brief change summary\n- Optional second bullet for another meaningful outcome\n\n## Why\n\n- Short reason the change exists\n```\n\nIf `Why` is not well-supported by the change context, omit that section entirely.\n\n## Guardrails\n\nDo not guess the purpose of the change when the diff only shows refactors or churn.\nDo not include a Testing section by default.\nDo not create a duplicate PR for the same head branch.\nIf `gh` blocks the create due to auth, remote state, or validation, surface the exact failure.\n\nALWAYS Omit `## Testing` \n"
+"keepRemoteControlAwakeWhilePluggedIn" = true
+"followUpQueueMode" = "queue"
+"dock-icon-preference" = "codex-system"
+"conversationDetailMode" = "STEPS_PROSE"
+
+["desktop"."appearanceLightChromeTheme"]
+"accent" = "#3d755d"
+"contrast" = 45
+"ink" = "#2f312d"
+"opaqueWindows" = false
+"surface" = "#f5f3ed"
+
+["desktop"."appearanceLightChromeTheme"."fonts"]
+"code" = "JetBrainsMono Nerd Font Mono"
+
+["desktop"."appearanceLightChromeTheme"."semanticColors"]
+"diffAdded" = "#3d755d"
+"diffRemoved" = "#ba2623"
+"skill" = "#5f6ac2"
+
+["desktop"."appearanceDarkChromeTheme"]
+"accent" = "#1f6feb"
+"contrast" = 60
+"ink" = "#e6edf3"
+"opaqueWindows" = true
+"surface" = "#0d1117"
+
+["desktop"."appearanceDarkChromeTheme"."fonts"]
+"code" = "JetBrainsMono Nerd Font Mono"
+"ui" = "Inter"
+
+["desktop"."appearanceDarkChromeTheme"."semanticColors"]
+"diffAdded" = "#3fb950"
+"diffRemoved" = "#f85149"
+"skill" = "#bc8cff"
+
+["plugins"]
+
+["plugins"."github@openai-curated"]
+"enabled" = true
+
+["plugins"."linear@openai-curated"]
+"enabled" = true
+
+["plugins"."documents@openai-primary-runtime"]
+"enabled" = true
+
+["plugins"."spreadsheets@openai-primary-runtime"]
+"enabled" = true
+
+["plugins"."presentations@openai-primary-runtime"]
+"enabled" = true
+
+["plugins"."pdf@openai-primary-runtime"]
+"enabled" = true
+
+["plugins"."template-creator@openai-primary-runtime"]
+"enabled" = true
+
+["plugins"."visualize@openai-bundled"]
+"enabled" = true
+
+["plugins"."browser@openai-bundled"]
+"enabled" = true
+
+["plugins"."chrome@openai-bundled"]
+"enabled" = true
+
+["plugins"."codex-app-tools@openai-bundled"]
+"enabled" = true
+
+["plugins"."unified-computer-use@openai-bundled"]
+"enabled" = true
+
+["plugins"."computer-use@openai-bundled"]
+"enabled" = true
+
+["plugins"."code-review@openai-bundled"]
+"enabled" = true
+
+["mcp_servers"]
+
+["mcp_servers"."graphite"]
+"command" = "gt"
+"args" = ["mcp"]
+
+["mcp_servers"."openaiDeveloperDocs"]
+"url" = "https://developers.openai.com/mcp"
+
+["mcp_servers"."supabase"]
+"url" = "https://mcp.supabase.com/mcp?project_ref=asbrehcjrzjhwfrrpzsd&read_only=true"
+
+["mcp_servers"."executor"]
+"url" = "https://executor.sh/alex-mclean-s-organization/mcp"
+
+["mcp_servers"."cozee"]
+"url" = "https://asbrehcjrzjhwfrrpzsd.supabase.co/functions/v1/cozee-mcp"

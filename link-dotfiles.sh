@@ -27,4 +27,6 @@ for f in dotfiles/bin/*; do
     ln -sf "$PWD/${f}" "$HOME/bin/${FILE}"
 done
 
+python3 "$PWD/scripts/link-agent-config.py"
+
 echo "Linked dotfiles. Please restart your shell. "

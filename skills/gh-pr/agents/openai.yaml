@@ -1,0 +1,4 @@
+interface:
+  display_name: "gh-pr"
+  short_description: "Create a GitHub draft pull request from this branch"
+  default_prompt: "Use $gh-pr to open a draft pull request from the current branch."

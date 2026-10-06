@@ -1,0 +1,4 @@
+interface:
+  display_name: "Check"
+  short_description: "Review and fix the current code changes"
+  default_prompt: "Use $check to independently review and fix my current changes."

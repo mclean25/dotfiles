@@ -1,0 +1,6 @@
+interface:
+  display_name: "Ultracheck"
+  short_description: "Run an adversarial multi-agent code review"
+  default_prompt: "Use $ultracheck to deeply review and fix my current changes."
+policy:
+  allow_implicit_invocation: false

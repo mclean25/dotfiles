@@ -1,0 +1,32 @@
+[branch]
+prefix = "alex"   # branches you create get `alex/<id>-<slug>`
+
+[harness]
+primary = "codex"
+
+[diff]
+command = "nvim -c 'lua vim.cmd(\"DiffviewOpen \" .. vim.fn.fnameescape({{base}}))'"
+
+[terminal]
+session_backend = "wezterm"
+wezterm_home_tab_title = "wt"
+
+[naming]
+auto_rename      = false
+harness          = "primary"
+reasoning_effort = "low"
+max_input_tokens = 8000
+timeout_ms       = 120000
+
+[naming.models]
+codex = "gpt-5.6-luna"
+
+[browser]
+# Chrome's on-disk directory for the personal `Person 1` profile.
+chrome_profile = "Default"
+
+[github]
+# Globs (case-insensitive, `*` only) matched against check context names.
+# Matching contexts are dropped from the PR checks rollup so junky bots
+# don't flip the badge.
+ignored_checks = ["CodeRabbit*", "coderabbitai*", "Graphite*", "graphite-app*"]

@@ -1,0 +1,15 @@
+.DS_Store
+__pycache__/
+*.pyc
+
+# Keep agent history, credentials, and generated files out of this repository.
+codex/*
+!codex/AGENTS.md
+!codex/settings.toml
+wt/*
+!wt/config.toml
+**/auth.json
+**/.credentials.json
+**/secrets/
+**/.env
+**/.env.local

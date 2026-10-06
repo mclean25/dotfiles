@@ -5,6 +5,26 @@ local act = wezterm.action
 local home = wezterm.home_dir
 local wt_script = home .. "/bin/wt"
 
+local function themeCycler(window, _)
+	local current = window:effective_config().color_scheme
+	local scheme = current == "Gruvbox Light" and "Catppuccin Mocha" or "Gruvbox Light"
+
+	local overrides = window:get_config_overrides() or {}
+	overrides.color_scheme = scheme
+	window:set_config_overrides(overrides)
+
+	local file, err = io.open("/tmp/wez-theme", "w")
+	if file then
+		local ok, write_err = file:write(scheme .. "\n")
+		local closed, close_err = file:close()
+		if not ok or not closed then
+			wezterm.log_error(tostring(write_err or close_err))
+		end
+	else
+		wezterm.log_error("Could not save theme: " .. tostring(err))
+	end
+end
+
 local function notify(window, title, message)
 	window:toast_notification(title, message, nil, 4000)
 end
@@ -111,12 +131,11 @@ local function prompt_for_branch(description, callback)
 end
 
 config.font = wezterm.font_with_fallback({
-	"JetBrains Mono",
-	"Symbols Nerd Font Mono",
+	"JetBrainsMono Nerd Font Mono",
 })
 config.font_size = 14.0
 
-config.leader = { key = " ", mods = "CTRL", timeout_milliseconds = 1000 }
+config.leader = { key = "Space", mods = "CTRL", timeout_milliseconds = 1000 }
 
 config.tab_bar_at_bottom = true
 config.use_fancy_tab_bar = false
@@ -171,6 +190,7 @@ wezterm.on("format-tab-title", function(tab, tabs, panes, cfg, hover, max_width)
 end)
 
 config.keys = {
+	{ key = "L", mods = "CTRL|SHIFT", action = wezterm.action_callback(themeCycler) },
 	{ key = "Enter", mods = "OPT", action = act.DisableDefaultAssignment },
 	{
 		key = "%",

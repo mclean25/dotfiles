@@ -1,0 +1,339 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+source_root="${WT_SYNC_SOURCE:-$HOME/dev/wt}"
+remote_host="${WT_SYNC_HOST:-}"
+dry_run=false
+skills_only=false
+
+usage() {
+  cat <<'EOF'
+usage: sync-wt [--dry-run] [--skills-only] [--source PATH] [--host SSH_HOST]
+
+Deploy the exact local wt working tree and the configured personal Codex skill
+to reachable hosts among dellserver and cozee-devbox.
+--host SSH_HOST (or WT_SYNC_HOST) targets only that host.
+Offline defaults are skipped; no reachable hosts or a failed sync exits nonzero.
+Use --skills-only to leave ~/.wt unchanged.
+EOF
+}
+
+while (($#)); do
+  case "$1" in
+    --dry-run)
+      dry_run=true
+      shift
+      ;;
+    --skills-only)
+      skills_only=true
+      shift
+      ;;
+    --source)
+      [[ $# -ge 2 ]] || { usage >&2; exit 2; }
+      source_root=$2
+      shift 2
+      ;;
+    --host)
+      [[ $# -ge 2 ]] || { usage >&2; exit 2; }
+      remote_host=$2
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      printf 'sync-wt: unknown argument: %s\n' "$1" >&2
+      usage >&2
+      exit 2
+      ;;
+  esac
+done
+
+# Keep each deployment in its own process: testing a shell function in an
+# if statement disables errexit throughout it, including its swap/probe steps.
+if [[ -z "$remote_host" ]]; then
+  reachable=0
+  failed=0
+  for candidate in dellserver cozee-devbox; do
+    printf 'sync-wt: checking %s\n' "$candidate"
+    if ! ssh -o BatchMode=yes -o ConnectTimeout=5 -o ConnectionAttempts=1 \
+      -o ServerAliveInterval=5 -o ServerAliveCountMax=1 "$candidate" true; then
+      printf 'sync-wt: skipping %s (SSH unavailable)\n' "$candidate" >&2
+      continue
+    fi
+    reachable=$((reachable + 1))
+    child_args=(--source "$source_root" --host "$candidate")
+    if $dry_run; then child_args+=(--dry-run); fi
+    if $skills_only; then child_args+=(--skills-only); fi
+    if bash "$0" "${child_args[@]}"; then
+      printf 'sync-wt: completed %s\n' "$candidate"
+    else
+      printf 'sync-wt: failed %s; continuing with remaining hosts\n' "$candidate" >&2
+      failed=$((failed + 1))
+    fi
+  done
+  if ((reachable == 0)); then
+    printf 'sync-wt: neither dellserver nor cozee-devbox is reachable\n' >&2
+    exit 1
+  fi
+  ((failed == 0)) || exit 1
+  exit 0
+fi
+
+scratch=$(mktemp -d "${TMPDIR:-/tmp}/sync-wt.XXXXXX")
+cleanup_local() {
+  rm -rf "$scratch"
+}
+trap cleanup_local EXIT
+
+sync_remote_browser_skill() {
+  local skill_name=remote-browser-smoke-test
+  local skill_root="${CODEX_HOME:-$HOME/.codex}/skills/$skill_name"
+  local archive="$scratch/$skill_name.tgz"
+
+  [[ -f "$skill_root/SKILL.md" ]] || {
+    printf 'sync-wt: personal skill not found: %s/SKILL.md\n' "$skill_root" >&2
+    return 1
+  }
+
+  # Dereference skill-directory symlinks so a Mac-only source path cannot
+  # become a broken link on the Linux worker.
+  COPYFILE_DISABLE=1 tar --no-mac-metadata --no-xattrs --dereference \
+    -C "$(dirname "$skill_root")" -czf "$archive" "$skill_name"
+  local expected_sha
+  expected_sha=$(shasum -a 256 "$archive" | awk '{print $1}')
+
+  if $dry_run; then
+    printf 'dry run: would replace %s:~/.codex/skills/%s from %s\n' \
+      "$remote_host" "$skill_name" "$skill_root"
+    return 0
+  fi
+
+  local stamp
+  local remote_payload
+  stamp=$(date -u +%Y%m%dT%H%M%SZ)-$$
+  remote_payload="/tmp/sync-wt-${skill_name}-${stamp}.tgz"
+  scp -q "$archive" "$remote_host:$remote_payload"
+
+  ssh "$remote_host" bash -s -- \
+    "$remote_payload" "$expected_sha" "$skill_name" <<'REMOTE_SKILL'
+set -euo pipefail
+
+payload=$1
+expected_sha=$2
+skill_name=$3
+target=$HOME/.codex/skills/$skill_name
+stage=$(mktemp -d "$HOME/.codex.skill-stage.XXXXXX")
+backup=""
+
+cleanup() {
+  rm -f "$payload"
+  rm -rf "$stage"
+  if [[ -n "$backup" && ( -e "$backup" || -L "$backup" ) ]]; then
+    if [[ ! -e "$target" && ! -L "$target" ]]; then
+      mv "$backup" "$target"
+    else
+      rm -rf "$backup"
+    fi
+  fi
+}
+trap cleanup EXIT
+
+actual_sha=$(sha256sum "$payload" | awk '{print $1}')
+[[ "$actual_sha" == "$expected_sha" ]] || {
+  printf 'sync-wt: transferred personal skill checksum mismatch\n' >&2
+  exit 1
+}
+
+tar -xzf "$payload" -C "$stage"
+[[ -f "$stage/$skill_name/SKILL.md" ]] || {
+  printf 'sync-wt: transferred personal skill has no SKILL.md\n' >&2
+  exit 1
+}
+
+skills_dir=$(dirname "$target")
+mkdir -p "$skills_dir"
+exec 9>"$skills_dir/.sync-wt.lock"
+flock 9
+
+if [[ -e "$target" || -L "$target" ]]; then
+  backup="$skills_dir/.${skill_name}.sync-backup.$(date -u +%Y%m%dT%H%M%SZ)-$$"
+  mv "$target" "$backup"
+fi
+if ! mv "$stage/$skill_name" "$target"; then
+  if [[ -n "$backup" && ( -e "$backup" || -L "$backup" ) ]]; then
+    mv "$backup" "$target"
+    backup=""
+  fi
+  printf 'sync-wt: personal skill install failed; restored previous copy\n' >&2
+  exit 1
+fi
+if [[ -n "$backup" ]]; then
+  rm -rf "$backup"
+  backup=""
+fi
+printf 'installed personal Codex skill %s on %s\n' "$skill_name" "$(hostname)"
+REMOTE_SKILL
+}
+
+if $skills_only; then
+  sync_remote_browser_skill
+  exit 0
+fi
+
+source_root=$(cd "$source_root" && pwd -P)
+git -C "$source_root" rev-parse --is-inside-work-tree >/dev/null
+[[ -x "$source_root/bin/wt" ]] || {
+  printf 'sync-wt: %s does not look like the wt source tree\n' "$source_root" >&2
+  exit 1
+}
+
+# Complete the small personal-skill transfer before replacing ~/.wt. A skill
+# failure therefore cannot turn an otherwise-successful wt deploy into a
+# partial result that still lacks the requested remote capability.
+sync_remote_browser_skill
+
+head_sha=$(git -C "$source_root" rev-parse HEAD)
+if git -C "$source_root" status --porcelain | grep -q .; then
+  working_tree_dirty=true
+else
+  working_tree_dirty=false
+fi
+git -C "$source_root" bundle create "$scratch/repo.bundle" HEAD
+git -C "$source_root" ls-files -co --exclude-standard -z > "$scratch/files.list"
+file_count=$(tr -cd '\0' < "$scratch/files.list" | wc -c | tr -d ' ')
+
+# Prevent macOS tar from embedding AppleDouble `._*` xattr sidecars. GNU tar
+# on the Linux host otherwise extracts hundreds of untracked metadata files.
+COPYFILE_DISABLE=1 tar --no-mac-metadata --no-xattrs \
+  -C "$source_root" --null -T "$scratch/files.list" -czf "$scratch/tree.tgz"
+tree_sha=$(shasum -a 256 "$scratch/tree.tgz" | awk '{print $1}')
+printf '%s\n' "$head_sha" > "$scratch/head"
+printf '%s\n' "$tree_sha" > "$scratch/tree.sha256"
+COPYFILE_DISABLE=1 tar --no-mac-metadata --no-xattrs \
+  -C "$scratch" -czf "$scratch/payload.tgz" repo.bundle tree.tgz head tree.sha256
+
+payload_bytes=$(wc -c < "$scratch/payload.tgz" | tr -d ' ')
+printf 'snapshot: %s files, %s bytes, HEAD %s%s\n' \
+  "$file_count" "$payload_bytes" "${head_sha:0:12}" \
+  "$($working_tree_dirty && printf '%s' ' + working changes' || true)"
+
+if $dry_run; then
+  printf 'dry run: would replace %s:~/.wt from %s\n' "$remote_host" "$source_root"
+  exit 0
+fi
+
+stamp=$(date -u +%Y%m%dT%H%M%SZ)-$$
+remote_payload="/tmp/sync-wt-${USER}-${stamp}.tgz"
+scp -q "$scratch/payload.tgz" "$remote_host:$remote_payload"
+
+ssh "$remote_host" bash -s -- "$remote_payload" "$head_sha" "$tree_sha" "$working_tree_dirty" <<'REMOTE'
+set -euo pipefail
+
+payload=$1
+expected_head=$2
+expected_tree_sha=$3
+expected_dirty=$4
+target=$HOME/.wt
+bun_bin=$(command -v bun || true)
+if [[ -z "$bun_bin" && -x "$HOME/.bun/bin/bun" ]]; then
+  bun_bin=$HOME/.bun/bin/bun
+fi
+[[ -n "$bun_bin" ]] || {
+  printf 'sync-wt: Bun is unavailable on the remote PATH or in ~/.bun/bin\n' >&2
+  exit 1
+}
+payload_dir=$(mktemp -d "$HOME/.wt.sync-payload.XXXXXX")
+stage=$(mktemp -d "$HOME/.wt.sync-stage.XXXXXX")
+backup=""
+
+cleanup_remote() {
+  rm -f "$payload"
+  rm -rf "$payload_dir"
+  if [[ -n "$stage" && -d "$stage" ]]; then
+    rm -rf "$stage"
+  fi
+}
+trap cleanup_remote EXIT
+
+tar -xzf "$payload" -C "$payload_dir"
+actual_tree_sha=$(sha256sum "$payload_dir/tree.tgz" | awk '{print $1}')
+[[ "$actual_tree_sha" == "$expected_tree_sha" ]] || {
+  printf 'sync-wt: transferred tree checksum mismatch\n' >&2
+  exit 1
+}
+[[ "$(cat "$payload_dir/head")" == "$expected_head" ]] || {
+  printf 'sync-wt: transferred HEAD mismatch\n' >&2
+  exit 1
+}
+
+git -C "$stage" init -q
+git -C "$stage" fetch -q "$payload_dir/repo.bundle" HEAD
+git -C "$stage" update-ref refs/heads/sync "$expected_head"
+git -C "$stage" symbolic-ref HEAD refs/heads/sync
+git -C "$stage" read-tree "$expected_head"
+tar -xzf "$payload_dir/tree.tgz" -C "$stage"
+
+if [[ -d "$target/node_modules" && -f "$target/bun.lock" ]] && \
+   cmp -s "$target/bun.lock" "$stage/bun.lock"; then
+  cp -al "$target/node_modules" "$stage/node_modules"
+else
+  (cd "$stage" && "$bun_bin" install --frozen-lockfile)
+fi
+
+(cd "$stage" && "$bun_bin" run typecheck)
+(cd "$stage" && WT_UPDATE=off WT_SKILLS=off "$bun_bin" src/main.ts --help >/dev/null)
+
+backup="$HOME/.wt.sync-backup.$(date -u +%Y%m%dT%H%M%SZ)"
+mv "$target" "$backup"
+if ! mv "$stage" "$target"; then
+  mv "$backup" "$target"
+  printf 'sync-wt: install swap failed; restored previous ~/.wt\n' >&2
+  exit 1
+fi
+stage=""
+
+restore_previous_install() {
+  failed="$HOME/.wt.sync-failed.$(date -u +%Y%m%dT%H%M%SZ)"
+  mv "$target" "$failed"
+  mv "$backup" "$target"
+  rm -rf "$failed"
+  printf 'sync-wt: %s; restored previous ~/.wt\n' "$1" >&2
+  exit 1
+}
+
+if ! (cd "$target" && WT_UPDATE=off WT_SKILLS=off "$bun_bin" src/main.ts --help >/dev/null); then
+  restore_previous_install "final probe failed"
+fi
+
+handshake=""
+if ! handshake=$(cd "$target" && WT_UPDATE=off WT_SKILLS=off "$bun_bin" src/main.ts _hello); then
+  restore_previous_install "worker handshake failed"
+fi
+if ! WT_SYNC_HANDSHAKE="$handshake" \
+  WT_SYNC_EXPECTED_HEAD="${expected_head:0:7}" \
+  WT_SYNC_EXPECTED_DIRTY="$expected_dirty" \
+    "$bun_bin" -e '
+      const info = JSON.parse(process.env.WT_SYNC_HANDSHAKE ?? "{}");
+      const head = process.env.WT_SYNC_EXPECTED_HEAD ?? "";
+      const dirty = process.env.WT_SYNC_EXPECTED_DIRTY === "true";
+      const expectedPrefix = `${head}${dirty ? "-dirty" : ""}`;
+      if (info.role !== "worker") throw new Error(`remote role is ${info.role ?? "missing"}, expected worker`);
+      if (info.protocol !== 2) throw new Error(`remote protocol is ${info.protocol ?? "missing"}, expected 2`);
+      if (typeof info.build !== "string" || !info.build.startsWith(expectedPrefix)) {
+        throw new Error(`remote build ${info.build ?? "missing"} does not match ${expectedPrefix}`);
+      }
+    '; then
+  restore_previous_install "worker handshake validation failed"
+fi
+
+rm -rf "$backup"
+backup=""
+dirty_count=$(git -C "$target" status --porcelain | wc -l | tr -d ' ')
+printf 'installed %s:~/.wt at %s (%s working-tree changes)\n' \
+  "$(hostname)" "${expected_head:0:12}" "$dirty_count"
+REMOTE
+
+printf 'sync-wt: local %s and %s:~/.wt now run the same working tree\n' \
+  "$source_root" "$remote_host"
